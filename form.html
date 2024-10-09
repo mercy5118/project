@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Validation</title>
+    <style>
+        /* Basic styling for the form */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 50px;
+            border: 10px double black;
+            padding:20px;
+        }
+
+        form {
+            border: 2px solid #ccc; /* Border color and thickness */
+            border-radius: 8px; /* Rounded corners */
+            padding: 20px; /* Space inside the form */
+            
+        }
+
+        input {
+            display: block;
+            margin-bottom: 15px;
+            padding: 10px;
+            width: 100%; /* Make input take full width */
+            box-sizing: border-box; 
+        }
+
+        .error {
+            color: red; /* Error messages */
+            font-size: 0.9em;
+            display: none; /* Hide error messages by default */
+        }
+
+        .requirement {
+            color: red; /* Default color for requirements */
+            display: none; /* Hide requirements by default */
+        }
+
+        h1{
+            text-align: center;
+        }
+
+        .requirement.valid {
+            color: green; /* Color when requirement is met */
+        }
+        button {
+            width: 200px; 
+            display: block; 
+            margin: 20px auto; 
+            padding: 10px; 
+            background-color: #4CAF50;
+            color: white; /* Text color */
+            border: none;
+            border-radius: 5px; /* Rounded corners */
+            cursor: pointer; /* Change cursor to pointer on hover */
+        }
+
+        button:hover {
+            background-color: #45a049; 
+        }
+    </style>
+</head>
+<body>
+    <h1>Form Validation</h1>
+    <form onsubmit="return validateForm()">
+        <label for="name">Name:</label>
+        <input type="text" id="name" required>
+        <span id="nameError" class="error"></span>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" required>
+        <span id="emailError" class="error"></span>
+
+        <label for="phone">Phone:</label>
+        <input type="text" id="phone" required>
+        <span id="phoneError" class="error"></span>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" required>
+        <div id="passwordRequirements">
+            <ul>
+                <li id="lengthRequirement" class="requirement">At least 8 characters long</li>
+                <li id="uppercaseRequirement" class="requirement">At least one uppercase letter</li>
+                <li id="numberRequirement" class="requirement">At least one number</li>
+                <li id="specialCharRequirement" class="requirement">At least one special character</li>
+                <li id="passwordNameRequirement" class="requirement">Cannot be "password" or your name</li>
+            </ul>
+        </div>
+        <span id="passwordError" class="error"></span>
+
+        <label for="confirmPassword">Confirm Password:</label>
+        <input type="password" id="confirmPassword" required>
+        <span id="confirmPasswordError" class="error"></span>
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        // Add event listener for password field input
+        const passwordField = document.getElementById("password");
+        const passwordError = document.getElementById("passwordError");
+        const requirements = document.querySelectorAll('.requirement');
+
+        
+        passwordField.addEventListener("focus", function() {
+            requirements.forEach(req => req.style.display = "block"); 
+        });
+
+        // Real-time password validation function
+        function validatePasswordLive() {
+            const password = passwordField.value;
+
+            
+            const lengthRequirement = document.getElementById("lengthRequirement");
+            const uppercaseRequirement = document.getElementById("uppercaseRequirement");
+            const numberRequirement = document.getElementById("numberRequirement");
+            const specialCharRequirement = document.getElementById("specialCharRequirement");
+            const passwordNameRequirement = document.getElementById("passwordNameRequirement");
+
+            // Strong password pattern
+            const strongPasswordPattern = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
+
+            // Clear previous error message
+            passwordError.textContent = "";
+            passwordError.style.display = "none"; // Hide the error message initially
+
+            // Check requirements
+            lengthRequirement.classList.toggle("valid", password.length >= 8);
+            uppercaseRequirement.classList.toggle("valid", /[A-Z]/.test(password));
+            numberRequirement.classList.toggle("valid", /\d/.test(password));
+            specialCharRequirement.classList.toggle("valid", /[@$!%*?&#]/.test(password));
+            passwordNameRequirement.classList.toggle("valid", password.toLowerCase() !== "password");
+
+            // Check if password is empty
+            if (password.trim() === "") {
+                passwordError.textContent = "Password is required.";
+                passwordError.style.display = "block"; // Show error message
+            }
+            // Check if password meets all requirements
+            else if (!strongPasswordPattern.test(password)) {
+                
+                passwordError.style.display = "block"; // Show error message
+            }
+        }
+
+        
+        passwordField.addEventListener("input", validatePasswordLive);
+
+        
+        function validateForm() {
+            const name = document.getElementById("name");
+            const email = document.getElementById("email");
+            const phone = document.getElementById("phone");
+            const confirmPassword = document.getElementById("confirmPassword");
+
+            const nameError = document.getElementById("nameError");
+            const emailError = document.getElementById("emailError");
+            const phoneError = document.getElementById("phoneError");
+            const confirmPasswordError = document.getElementById("confirmPasswordError");
+
+            let isValid = true;
+
+            // Clear error messages for other fields
+            nameError.textContent = "";
+            emailError.textContent = "";
+            phoneError.textContent = "";
+            confirmPasswordError.textContent = "";
+
+            // Validate name: at least 5 characters
+            if (name.value.trim() === "") {
+                nameError.textContent = "Name is required.";
+                isValid = false;
+            } else if (name.value.length < 5) {
+                nameError.textContent = "Name must be at least 5 characters long.";
+                isValid = false;
+            }
+
+            // Validate email: must contain '@'
+            if (email.value.trim() === "") {
+                emailError.textContent = "Email is required.";
+                isValid = false;
+            } else if (!email.value.includes("@")) {
+                emailError.textContent = "Please enter a valid email address.";
+                isValid = false;
+            }
+
+            // Validate phone number: must be 10 digits and not "1234567890"
+            const phonePattern = /^[0-9]{10}$/;
+            if (phone.value.trim() === "") {
+                phoneError.textContent = "Phone number is required.";
+                isValid = false;
+            } else if (!phonePattern.test(phone.value)) {
+                phoneError.textContent = "Phone number must be a 10-digit number.";
+                isValid = false;
+            } else if (phone.value === "1234567890") {
+                phoneError.textContent = "Phone number cannot be '1234567890'.";
+                isValid = false;
+            }
+
+            // Validate confirm password: should match the password
+            if (confirmPassword.value.trim() === "") {
+                confirmPasswordError.textContent = "Please confirm your password.";
+                isValid = false;
+            } else if (passwordField.value !== confirmPassword.value) {
+                confirmPasswordError.textContent = "Passwords do not match.";
+                isValid = false;
+            }
+
+            // Return the overall validity of the form
+            return isValid;
+        }
+    </script>
+</body>
+</html>
